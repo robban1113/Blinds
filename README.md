@@ -6,3 +6,9 @@ I have used the "simple-LED" sketch in his library with no problem and are tryin
 
 Struggling to understand the architecture as I'm sure you can see. 
 So please feel free to make pull request! 
+
+PARTS I USE:
+
+WEMONS D1 MINI
+ULN2003 DRIVER
+28BYJ-48 STEPPER MOTOR

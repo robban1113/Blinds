@@ -10,11 +10,13 @@ So please feel free to make pull request!
 ------------------------
 PARTS I USE:
 ------------------------
+
 WEMONS D1 MINI
 
 ULN2003 DRIVER
 
 28BYJ-48 STEPPER MOTOR
+
 ------------------------
 
 Thanks in advance!

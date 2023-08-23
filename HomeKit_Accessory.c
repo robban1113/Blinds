@@ -84,7 +84,6 @@ homekit_accessory_t *accessories[] =
             NULL
         }),
         NULL
-		};
 //				HOMEKIT_ACCESSORY(
 //						.id = 1,
 //						.category = homekit_accessory_category_other,

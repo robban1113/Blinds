@@ -7,6 +7,8 @@ I have used the "simple-LED" sketch in his library with no problem and are tryin
 Struggling to understand the architecture as I'm sure you can see. 
 So please feel free to make pull request! 
 
+UPDATE: Tried to adapt the HomeKit_Accessory.c to the window category (HAP).
+
 ------------------------
 PARTS I USE:
 ------------------------

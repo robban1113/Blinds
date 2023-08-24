@@ -1,16 +1,3 @@
-/*
- * simple_led_accessory.c
- * Define the accessory in pure C language using the Macro in characteristics.h
- *
- *  Created on: 2020-02-08
- *      Author: Mixiaoxiao (Wang Bin)
- *  Edited on: 2020-03-01
- *      Edited by: euler271 (Jonas Linn)
- *
- * This is where I get totaly lost!
- */
-
-
 #include <Arduino.h>
 #include <homekit/types.h>
 #include <homekit/homekit.h>
@@ -18,105 +5,61 @@
 #include <stdio.h>
 #include <port.h>
 
-//const char * buildTime = __DATE__ " " __TIME__ " GMT";
-
-#define ACCESSORY_NAME  ("ESP8266_LED")
-#define ACCESSORY_SN  ("SN_0123456")  //SERIAL_NUMBER
-#define ACCESSORY_MANUFACTURER ("Arduino Homekit")
-#define ACCESSORY_MODEL  ("ESP8266")
-
-#define PIN_LED  2 //D4 - Not sure if I need to declare the pins for the driver here?
-
-bool led_power = false; //true or flase
-
-homekit_value_t led_on_get() {
-	return HOMEKIT_BOOL(led_power);
+//Called to identify the accessory
+void my_accessory_identify(homekit_value_t _value) {
+  printf("accessory identify\n");
 }
 
-void led_on_set(homekit_value_t value) {
-	if (value.format != homekit_format_bool) {
-		printf("Invalid on-value format: %d\n", value.format);
-		return;
-	}
-	led_power = value.bool_value;
-	led_update();
-}
+// FOR WINDOW
+// the required characteristics are: CURRENT_POSITION, TARGET_POSITION, POSITION_STATE
+// the optional characteristics are: NAME, HOLD_POSITION, OBSTRUCTION_DETECTED
+// See HAP section 8.41 and characteristics.h
 
-homekit_characteristic_t name = HOMEKIT_CHARACTERISTIC_(NAME, ACCESSORY_NAME);
-homekit_characteristic_t serial_number = HOMEKIT_CHARACTERISTIC_(SERIAL_NUMBER, ACCESSORY_SN);
-homekit_characteristic_t led_on = HOMEKIT_CHARACTERISTIC_(ON, false, .getter=led_on_get, .setter=led_on_set);
+homekit_characteristic_t cha_current_position = HOMEKIT_CHARACTERISTIC_(CURRENT_POSITION, "0");
+homekit_characteristic_t cha_target_position = HOMEKIT_CHARACTERISTIC_(TARGET_POSITION, "0");
+homekit_characteristic_t cha_position_state = HOMEKIT_CHARACTERISTIC_(POSITION_STATE, "0");
 
-void led_update() {
-	if (led_power) {
-   printf("ON\n");
-   digitalWrite(PIN_LED, LOW);
-	} else {
-		printf("OFF\n");
-		digitalWrite(PIN_LED, HIGH);
-	}
-}
+// (optional) format: bool; HAP section x.xx 
+// homekit_characteristic_t cha_name = HOMEKIT_CHARACTERISTIC_(NAME, "window blinds");
 
-void led_toggle() {
-	led_on.value.bool_value = !led_on.value.bool_value;
-	led_on.setter(led_on.value);
-	homekit_characteristic_notify(&led_on, led_on.value);
-}
+// (optional) format: bool; HAP section x.xx 
+// homekit_characteristic_t cha_hold_postion = HOMEKIT_CHARACTERISTIC_(HOLD_POSITION, "typ av parameter?"); //unsure of parameter
 
-void accessory_identify(homekit_value_t _value) {
-	printf("accessory identify\n");
-	for (int j = 0; j < 3; j++) {
-		led_power = true;
-		led_update();
-		delay(100);
-		led_power = false;
-		led_update();
-		delay(100);
-	}
-}
+// (optional) format: bool; HAP section x.xx 
+// homekit_characteristic_t cha_obstruction_detected = HOMEKIT_CHARACTERISTIC_(OBSTRUCTION_DETECTED, false);
 
-homekit_accessory_t *accessories[] =
-		{
-            HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_window, .services=(homekit_service_t*[]) {
-            HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]) {
-            HOMEKIT_CHARACTERISTIC(CURRENT_POSITION, "0"),
-            HOMEKIT_CHARACTERISTIC(TARGET_POSITION, "0"),
-            HOMEKIT_CHARACTERISTIC(POSITION_STATE, "0"),
+
+homekit_accessory_t *accessories[] = {
+    HOMEKIT_ACCESSORY(.id=1, .category=homekit_accessory_category_window, .services=(homekit_service_t*[]) {
+        HOMEKIT_SERVICE(ACCESSORY_INFORMATION, .characteristics=(homekit_characteristic_t*[]) {
+            HOMEKIT_CHARACTERISTIC(CURRENT_POSTION, "0"),
+            HOMEKIT_CHARACTERISTIC(TARGET_POSTION, "0"),
+            HOMEKIT_CHARACTERISTIC(POSTION_STATE, "0"),
             NULL
         }),
+        HOMEKIT_SERVICE(WINDOW, .primary=true, .characteristics=(homekit_characteristic_t*[]) {
+            &cha_current_position,
+      &cha_target_position,
+      &cha_position_state,
+      //&cha_name,//optional
+      //&cha_hold_position,//optional
+      //&cha_obstruction_detected,//optional
+            NULL
+        }),
+    // Add this HOMEKIT_SERVICE if you want to use another accessory together
+    /*
+        HOMEKIT_SERVICE(ACCESSORY, .characteristics=(homekit_characteristic_t*[]) {
+            HOMEKIT_CHARACTERISTIC(NAME, "accessory-example-button"),
+            &cha_accessory,
+            NULL
+        }),*/
         NULL
-//				HOMEKIT_ACCESSORY(
-//						.id = 1,
-//						.category = homekit_accessory_category_other,
-//						.services=(homekit_service_t*[]){
-//						  HOMEKIT_SERVICE(ACCESSORY_INFORMATION,
-//						  .characteristics=(homekit_characteristic_t*[]){
-//						    &name,
-//						    HOMEKIT_CHARACTERISTIC(MANUFACTURER, ACCESSORY_MANUFACTURER),
-//						    &serial_number,
-//						    HOMEKIT_CHARACTERISTIC(MODEL, ACCESSORY_MODEL),
-//						    HOMEKIT_CHARACTERISTIC(FIRMWARE_REVISION, "0.0.1"),
-//						    HOMEKIT_CHARACTERISTIC(IDENTIFY, accessory_identify),
-//						    NULL
-//						  }),
-//						  HOMEKIT_SERVICE(WINDOW, .primary=true,
-//						  .characteristics=(homekit_characteristic_t*[]){
-//						    HOMEKIT_CHARACTERISTIC(NAME, "Stepper"),
-//						    &led_on,
-//						    NULL
-//						  }),
-//						  NULL
-//						}),
-//				NULL
-		};
-
-homekit_server_config_t config = {
-		.accessories = accessories,
-		.password = "111-11-111",
-		//.on_event = on_homekit_event,
-		.setupId = "ABCD"
+    }),
+    NULL
 };
 
-void accessory_init() {
-	pinMode(PIN_LED, OUTPUT);
-	led_update();
-}
+homekit_server_config_t config = {
+    .accessories = accessories,
+    .password = "111-11-111"
+    .setupId = "ABCD" // Not sure if this is needed
+};
